@@ -1,0 +1,17 @@
+- name: "rg-networking-dev"
+  resource_name: "rg-networking-dev"
+  location: "australiaeast"
+  tags: 
+    billing_code: "demo"
+
+- name: "rg-networkprotection-dev"
+  resource_name: "rg-networkprotection-dev"
+  location: "australiaeast"
+  tags: 
+    billing_code: "demo"
+
+- name: "rg-dnszones-dev"
+  resource_name: "rg-dnszones-dev"
+  location: "australiaeast"
+  tags: 
+    billing_code: "demo"

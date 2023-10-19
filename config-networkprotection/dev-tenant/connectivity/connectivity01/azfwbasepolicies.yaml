@@ -1,0 +1,63 @@
+- name: "fwpol-basepolicy-ae"
+  resource_name: "fwpol-basepolicy-ae"
+  location: "australiaeast"
+  resource_group_name: "rg-networkprotection-dev" # Must be same Resource Group as per AzureFirewallSubnet VNET
+  sku: "Premium" # Standard, Premium
+  base_policy_name: # maps to 'base_policy_id' - optional
+  threat_intelligence_mode: "Alert" # Alert, Deny, Off
+  threat_intelligence_allowlist: # single block, optional
+    # - ip_addresses: ["200.10.10.10","200.10.10.11"] # Maps to subnet_id which is the target AzureFirewallSubnet instance (must exist)
+    #   fqdns: ["www.companywebsite1.com","www.companywebsite2.com"]
+  dns: # single block, optional
+  #- name: "azfw-dns-config" 
+  #  servers: ["192.168.200.10","192.168.200.11"] # List
+  #  proxy_enabled: true/false
+  intrusion_detection:
+  - name: "child-intrusiondetection-config"
+    mode: "Alert" # Alert, Deny, or Off
+    signature_overrides: #blocks
+    - name: "override-sig1"
+      id: "2000015" # 12 digit ID of signature, se e.g. https://learn.microsoft.com/en-us/rest/api/virtualnetwork/firewall-policy-idps-signatures/list
+      state: "Off" # Off, Alert, Deny
+    - name: "override-sig2"
+      id: "2000106" # 12 digit ID of signature
+      state: "Alert" # Off, Alert, Deny
+    traffic_bypass: #blocks
+    - name: "bypass1" # Required, maps to name of the bypass rule in policy
+      bypass_rule_name: "bypass1"
+      protocol: "TCP" # Required. ANY, TCP, ICMP, or UDP
+      description: # Optional
+      source_addresses: # List, optional
+        - "10.96.0.0/16"
+        - "10.92.0.0/16" 
+      #source_ip_groups: [] # List, optional
+      destination_addresses: # List, optional
+        - "*" 
+      #destination_ip_groups: [] # List, optional
+      destination_ports: # List, optional
+        - "443" 
+    - name: "bypass2" # Required, maps to name of the bypass rule in policy
+      bypass_rule_name: "bypass2"
+      protocol: "TCP" # Required. ANY, TCP, ICMP, or UDP
+      description: # Optional
+      source_addresses: # List, optional
+        - "10.196.0.0/16" 
+      #source_ip_groups: [] # List, optional
+      destination_addresses:  # List, optional
+        - "*"
+      #destination_ip_groups: [] # List, optional
+      destination_ports: ["443"] # List, optional
+  insights: # NOTE: some pre-reqs to get Policy insights/Analytics working
+    - name: "child-insights-config"
+      enabled: true # Alert, Deny, or Off
+      default_log_analytics_workspace_id: "/subscriptions/xxxxxxxxxxxxxxxxxxxxxxxxx/resourceGroups/rg-acrrunners/providers/Microsoft.OperationalInsights/workspaces/la-aca-runners" # Full Resource Id of target Log Analtics instace. SHould be same as that configured for Diagnostic Settings on the associated firewall if that is already enabled.
+      retention_in_days: "90"
+      log_analytics_workspace: # List of blocks. Refers to the "Regional Workspace" configuration in the portal, and defaults to the "Default workspce" i.e.
+      # - name: "child-law-association"
+      #   id: "xxxxxxxxx" # ID of LA workspace that AzFws associated with this policy send their 'Policy Insights' logs to, overrides default_log_analytics_workspace_id when firewall_location matches
+      #   firewall_location: "australiaeast" # Reqd as above.
+  tags:
+    cost_center: "1234"
+    environment: "prod"
+    security_dimension: "internally-controlled"
+

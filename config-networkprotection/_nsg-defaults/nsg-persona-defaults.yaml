@@ -1,0 +1,101 @@
+- persona_name: "prod-corp"
+  default_security_rules:
+  - name: prod-corp-1
+    description: prod-corp-1
+    direction: Outbound
+    access: Deny
+    priority: 3997
+    source_address_prefix: '*'
+    destination_address_prefix: 'Internet'
+    source_port_range: '*'
+    destination_port_range: '*'
+    protocol: '*'
+  - name: prod-corp-2
+    description: prod-corp-2
+    direction: Inbound
+    access: Deny
+    priority: 3998
+    source_address_prefix: '*'
+    destination_address_prefix: '*'
+    source_port_range: '*'
+    destination_port_range: '*'
+    protocol: '*'
+- persona_name: "qa-corp"
+  default_security_rules:
+  - name: qa-corp-1
+    description: qa-corp-1
+    direction: Outbound
+    access: Deny
+    priority: 3997
+    source_address_prefix: '*'
+    destination_address_prefix: 'Internet'
+    source_port_range: '*'
+    destination_port_range: '*'
+    protocol: '*'
+  - name: qa-corp-2
+    description: qa-corp-2
+    direction: Inbound
+    access: Deny
+    priority: 3998
+    source_address_prefix: '*'
+    destination_address_prefix: '*'
+    source_port_range: '*'
+    destination_port_range: '*'
+    protocol: '*'
+  - name: qa-corp-3
+    description: rule5
+    direction: Inbound
+    access: Allow
+    priority: 3999
+    source_address_prefixes: 
+      - "10.0.0.0/24"
+      - "192.168.10.0/24"
+    destination_address_prefixes:
+      - "10.0.1.0/24"
+    source_port_range: '*'
+    destination_port_range: '1433'
+    protocol: 'Tcp'
+- persona_name: "dev-corp"
+  default_security_rules:
+  - name: dev-corp-1
+    description: dev-corp-1
+    direction: Outbound
+    access: Deny
+    priority: 3997
+    source_address_prefix: '*'
+    destination_address_prefix: 'Internet'
+    source_port_range: '*'
+    destination_port_range: '*'
+    protocol: '*'
+  - name: dev-corp-2
+    description: dev-corp-2
+    direction: Inbound
+    access: Deny
+    priority: 3998
+    source_address_prefix: '*'
+    destination_address_prefix: '*'
+    source_port_range: '*'
+    destination_port_range: '*'
+    protocol: '*'
+- persona_name: "management-general"
+  default_security_rules:
+  - name: management-general-1
+    description: management-general-1
+    direction: Outbound
+    access: Deny
+    priority: 3997
+    source_address_prefix: '*'
+    destination_address_prefix: 'Internet'
+    source_port_range: '*'
+    destination_port_range: '*'
+    protocol: '*'
+  - name: management-general-2
+    description: management-general-2
+    direction: Inbound
+    access: Deny
+    priority: 3998
+    source_address_prefix: '*'
+    destination_address_prefix: '*'
+    source_port_range: '*'
+    destination_port_range: '*'
+    protocol: '*'

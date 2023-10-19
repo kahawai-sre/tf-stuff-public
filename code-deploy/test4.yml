@@ -1,0 +1,188 @@
+name: $(BuildDefinitionName)_$(date:yyyyMMdd)$(rev:.r)
+trigger: none
+variables:
+- name: devBuildAgentPool
+  value: 'acapool'
+parameters:
+- name: dev_subscriptions
+  type: object
+  default:
+  - subName: 'corp01'
+    archetype: 'corp'
+    tenant: 'dev-tenant'
+    stageName: 'CORP01'
+  - subName: 'conn01'
+    archetype: 'conn01'
+    tenant: 'dev-tenant'
+    stageName: 'CONN01'
+
+stages:
+
+- stage: STG_START
+  condition: always()
+  jobs:
+  - job: JOB_TEST
+    pool: "${{ variables['devBuildAgentPool'] }}"
+    steps:
+      - checkout: self
+      - task: Bash@3
+        displayName: "Checking variable values from previous stage"
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo 'Welcome'
+
+- ${{ each subscription in parameters.dev_subscriptions }}:
+
+  - stage: STG_VALIDATE_${{subscription.stageName}}
+    dependsOn: STG_START
+    condition: succeeded('STG_START')
+    jobs:
+      - job: 
+        displayName: JOB1 
+        pool: "${{ variables['devBuildAgentPool'] }}"
+        variables:
+        - name: job_dependencies
+          value: $[convertToJson(dependencies)]
+        steps:
+        - checkout: self
+        - task: Bash@3
+          name: TASK1
+          inputs:
+            targetType: 'inline'
+            script: | 
+              echo "job_dependencies: $(job_dependencies)"
+              echo "##vso[task.setvariable variable=myAvar;isoutput=true]myAval"
+
+  - stage: ${{subscription.stageName}}
+    dependsOn: STG_VALIDATE_${{subscription.stageName}}
+    condition: always()
+    variables:
+      - name: stage_stage_dependencies
+        value: $[convertToJson(stageDependencies)]
+      - name: stage_dependencies
+        value: $[convertToJson(dependencies)]
+    jobs:
+    - job: JOB1
+      pool: "${{ variables['devBuildAgentPool'] }}"
+      variables:
+      - name: job_dependencies
+        value: $[convertToJson(dependencies)]
+      steps:
+      - checkout: self
+      - task: Bash@3
+        name: TASK1
+        inputs:
+          targetType: 'inline' # => create $planNumChanges here <=
+          script: |
+            #planNumChanges=$[RANDOM%2+1]
+            planNumChanges=2
+            echo 'planNumChanges: '$planNumChanges
+            echo "##vso[task.setvariable variable=planNumChanges;isOutput=true]$planNumChanges"
+            echo "##vso[task.setvariable variable=myAvar;isoutput=true]myBval"
+            echo "stage_stageDependencies: $(stage_stage_dependencies)"
+            echo "stage_dependencies: $(stage_dependencies)"
+            echo "job_dependencies: $(job_dependencies)"
+          workingDirectory: '${{ variables.tfWorkingDirectory }}'
+
+- stage: STG_START_PROD
+  dependsOn:
+  - ${{ each subscription in parameters.dev_subscriptions }}:
+    - ${{subscription.stageName}}
+  #condition: and(succeeded(), eq(stageDependencies.*.outputs['JOB1.TASK1.planNumChanges'], '2'))
+  # <== SEE https://stackoverflow.com/questions/63904345/construct-a-condition-in-azure-devops-using-each ==>
+  ${{ if eq(length(parameters.dev_subscriptions), 0) }}:
+    condition: false
+  ${{ else }}:
+    condition: |
+      and(
+        True,
+        eq(stageDependencies.${{ join('.outputs[''JOB1.TASK1.planNumChanges''], ''2''), eq(stageDependencies.', parameters.dev_subscriptions.*.stageName) }}.outputs['JOB1.TASK1.planNumChanges'], '2')
+      )
+    # or(
+    #   False,
+    #   eq(stageDependencies.${{ join('.outputs[''JOB1.TASK1.planNumChanges''], ''2''), eq(stageDependencies.', parameters.dev_subscriptions.*.stageName) }}.outputs['JOB1.TASK1.planNumChanges'], '2')
+    # )
+    # or(
+    #   eq(stageDependencies.*.outputs['JOB1.TASK1.planNumChanges'], 2),
+    #   eq(stageDependencies.*.outputs['JOB1.TASK1.planNumChanges'], '2'),
+    #   eq(dependencies.*.outputs['JOB1.TASK1.planNumChanges'], 2),
+    #   eq(dependencies.*.outputs['JOB1.TASK1.planNumChanges'], '2'),
+    #   eq(dependencies.*.JOB1.outputs['TASK1.planNumChanges'], 2),
+    #   eq(dependencies.*.JOB1.outputs['TASK1.planNumChanges'], '2')
+    # )
+  variables:
+    stage_stage_dependencies: $[convertToJson(stageDependencies)]
+    stage_dependencies: $[convertToJson(dependencies)]
+  jobs:
+  - job: JOB1
+    pool: "${{ variables['devBuildAgentPool'] }}"
+    variables:
+    - name: job_dependencies
+      value: $[convertToJson(dependencies)]
+    steps:
+    - checkout: self
+    - task: Bash@3
+      name: TASK1
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "stage_stage_dependencies: $(stage_stage_dependencies)"
+          echo "stage_dependencies: $(stage_dependencies)"
+          echo "job_dependencies: $(job_dependencies)"
+
+- stage: STG_END
+  dependsOn:
+  - STG_START_PROD
+  - ${{ each subscription in parameters.dev_subscriptions }}:
+    - ${{subscription.stageName}}
+  condition: |
+    and(
+      eq(stageDependencies.${{ join('.outputs[''JOB1.TASK1.planNumChanges''], ''2''), eq(stageDependencies.', parameters.dev_subscriptions.*.stageName) }}.outputs['JOB1.TASK1.planNumChanges'], '2')
+    )
+  variables:
+    stage_stage_dependencies: $[convertToJson(stageDependencies)]
+    stage_dependencies: $[convertToJson(dependencies)]
+  jobs:
+  - job: JOB1
+    pool: "${{ variables['devBuildAgentPool'] }}"
+    variables:
+    - name: job_dependencies
+      value: $[convertToJson(dependencies)]
+    steps:
+    - checkout: self
+    - task: Bash@3
+      name: TASK1
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "stage_stage_dependencies: $(stage_stage_dependencies)"
+          echo "stage_dependencies: $(stage_dependencies)"
+          echo "job_dependencies: $(job_dependencies)"
+          #echo 'tf plan changes present:'$(tfPlanChangesPresent)
+
+# Reference output variable a job in ANY PREVIOUS STAGE in a job in a different stage:
+# Syntax: and(succeeded(), eq(stageDependencies.<stage-name>.outputs['<job-name>.<step-name>.<variable-name>'], 'true'))
+# Example: and(succeeded(), eq(stageDependencies.A.outputs['A1.printvar.shouldrun'], 'true'))
+
+# stages:
+# - stage: A
+#   jobs:
+#   - job: A1
+#     steps:
+#      - bash: echo "##vso[task.setvariable variable=shouldrun;isOutput=true]true"
+#      # or on Windows:
+#      # - script: echo ##vso[task.setvariable variable=shouldrun;isOutput=true]true
+#        name: printvar
+
+# - stage: B
+#   condition: and(succeeded(), eq(stageDependencies.A.outputs['A1.printvar.shouldrun'], 'true'))
+#   dependsOn: A
+#   jobs:
+#   - job: B1
+#     steps:
+#     - script: echo hello from Stage B
+
+# NOTE:
+# By default, each stage in a pipeline depends on the one just before it in the YAML file.
+# If you need to refer to a stage that isn't immediately prior to the current one, you can override this AUTOMATIC DEFAULT by ADDING A "dependsOn" section to the stage.

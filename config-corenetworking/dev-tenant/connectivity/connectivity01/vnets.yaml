@@ -1,0 +1,17 @@
+- name: "vnet-connectivity-001"
+  resource_name: "vnet-connectivity-001"
+  location: "australiaeast"
+  address_space: 
+    - "10.111.0.0/16"
+  dns_servers:
+    - "10.1.0.4"
+  resource_group_name: "rg-networking-dev"
+
+- name: "vnet-connectivity-dmz"
+  resource_name: "vnet-connectivity-dmz"
+  location: "australiaeast"
+  address_space: 
+    - "10.110.0.0/16"
+  resource_group_name: "rg-networking-dev"
+
+

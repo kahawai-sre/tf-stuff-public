@@ -1,0 +1,73 @@
+
+# --------------------------------- APPLICATION 1 -------------------------------------
+
+- name: "nsg-app1-corp01"
+  resource_group_name: "rg-networkprotection-dev" # <<== Name of the target resource group for the NSG. Must be part of this TF deployment, or already exist
+  location: "australiaeast"
+  persona: "qa-corp" # Setting this property will look for a set of NSG rules that appy to the persona as defined in /<config>/_nsg_defaults/nsg-persona-default.yaml. The named persona must match a value in the yaml file. 
+  apply_persona_rules: true # Set this property to false to exclude the NSG rules listed for the persona.
+  apply_default_rules: true # Set to true to include the 'global" default rules listed in /<config>/_nsg_defaults/nsg-global-defaults.yaml' in the NSGs ruleset. Priorities must not overlap.
+  subnet_network_security_group_associations:
+    - name: "app01-internally-controlled"
+      subnet_name: "app01-internally-controlled"
+    - name: "app01-restricted"
+      subnet_name: "app01-restricted"
+    - name: "app01-secure"
+      subnet_name: "app01-secure"
+  tags:
+  security_rules:
+    - name: rule1
+      description: rule1
+      direction: Inbound
+      access: Allow
+      priority: 130
+      source_address_prefix: '*'
+      destination_address_prefix: '*'
+      source_port_range: '*'
+      destination_port_range: '80'
+      protocol: '*'
+    - name: rule2
+      description: rule2
+      direction: Inbound
+      access: Allow
+      priority: 131
+      source_address_prefix: '*'
+      destination_address_prefix: '*'
+      source_port_range: '*'
+      destination_port_range: '443'
+      protocol: 'Tcp'
+    # - name: rule3
+    #   description: rule3
+    #   direction: Inbound
+    #   access: Allow
+    #   priority: 132
+    #   source_address_prefix: '*'
+    #   destination_address_prefix: '*'
+    #   source_port_range: '*'
+    #   destination_port_range: '3389'
+    #   protocol: 'Tcp'
+    - name: rule4
+      description: rule4
+      direction: Inbound
+      access: Allow
+      priority: 133
+      source_application_security_group_names:
+        - asg-app1
+      destination_application_security_group_names:
+        - asg-app2
+      source_port_range: '*'
+      destination_port_range: '1433'
+      protocol: 'Tcp'
+    - name: rule5
+      description: rule5
+      direction: Inbound
+      access: Allow
+      priority: 134
+      source_address_prefixes: 
+        - "10.0.0.0/24"
+        - "192.168.10.0/24"
+      destination_address_prefixes:
+        - "10.0.1.0/24"
+      source_port_range: '*'
+      destination_port_range: '1433'
+      protocol: 'Tcp'

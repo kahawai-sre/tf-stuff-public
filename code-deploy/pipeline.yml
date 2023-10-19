@@ -1,0 +1,385 @@
+name: $(BuildDefinitionName)_$(date:yyyyMMdd)$(rev:.r)
+trigger: none
+
+variables:
+- name: tfWorkingDirectory
+  value: './code-deploy/'
+- name: netConfigDir  
+  value: '../config-corenetworking'
+- name: secConfigDir
+  value: '../config-networkprotection'
+- name: devStateBackendSubscriptionId
+  value: '29c7e3d4-e589-4555-a1d8-ac60fcc05a2c'
+- name: devBuildAgentPool
+  value: 'acapool'
+- name: terraformVersion
+  value: '1.5.5'
+parameters:
+- name: dev_subscriptions
+  type: object
+  default:
+  - subName: 'corp01'
+    archetype: 'corp'
+    tenant: 'dev-tenant'
+    stageName: 'LZ_CORP_CORP01'
+  - subName: 'connectivity01'
+    archetype: 'connectivity'
+    tenant: 'dev-tenant'
+    stageName: 'LZ_CONN_CONN01'
+- name: prod_subscriptions
+  type: object
+  default:
+  - subName: 'corp01'
+    archetype: 'corp'
+    tenant: 'prod-tenant'
+    stageName: 'LZ_CORP_CORP01'
+  - subName: 'connectivity01'
+    archetype: 'connectivity'
+    tenant: 'prod-tenant'
+    stageName: 'LZ_CONN_CONN01'
+
+# ----- DEV STAGES ------
+
+stages:
+
+- stage: STG_START_DEV
+  condition: always()
+  jobs:
+  - job: JOB_TEST
+    pool: "${{ variables['devBuildAgentPool'] }}"
+    steps:
+      - checkout: self
+      - task: Bash@3
+        displayName: "Checking variable values from previous stage"
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo 'Welcome'
+
+- ${{ each subscription in parameters.dev_subscriptions }}:
+  - stage: DEV_STG_VALIDATE_${{subscription.stageName}}
+    dependsOn: STG_START_DEV
+    condition: succeeded('STG_START_DEV')
+    jobs:
+      - job: 
+        displayName: Validate Terraform
+        pool: "${{ variables['devBuildAgentPool'] }}"
+        steps:
+        - checkout: self
+        - task: TerraformInstaller@0
+          displayName: "Install terraform version ${{ variables.terraformVersion }}"
+          inputs:
+            terraformVersion: '${{ variables.terraformVersion }}'
+        - task: Bash@3
+          displayName: 'Check dir structure'
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo 'checking sub value'
+              echo ${{ subscription.subName }}
+              echo '$(System.DefaultWorkingDirectory)'
+              echo 'view files'
+              ls -lth
+            #workingDirectory: '${{ variables.tfWorkingDirectory }}'
+        - task: Bash@3
+          displayName: 'Prepare the terraform provider files for each subscription'
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo 'checking sub value'
+              echo ${{ subscription.subName }}
+              cp './providers/dev-tenant/'${{ subscription.subName }}'.tf' .
+              cp './providers/dev-tenant/'${{ subscription.subName }}'.tfvars' .
+              echo 'view files'
+              ls -lth
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'
+        - pwsh: terraform fmt -check
+          displayName: Terraform Format Check
+          workingDirectory: '${{ variables.tfWorkingDirectory }}'
+        - pwsh: terraform init -backend=false
+          displayName: Terraform Init check - no backend
+          workingDirectory: '${{ variables.tfWorkingDirectory }}'
+        - pwsh: terraform validate
+          displayName: Terraform Validate
+          workingDirectory: '${{ variables.tfWorkingDirectory }}'
+
+  - stage: DEV_STG_PLAN_${{subscription.stageName}}
+    dependsOn: DEV_STG_VALIDATE_${{subscription.stageName}}
+    condition: always()
+    variables: 
+      netConfigPath: "${{ variables.netConfigDir }}/${{ subscription.tenant }}/${{ subscription.archetype }}/${{ subscription.subName }}"
+      secConfigPath: "${{ variables.setConfigDir }}/${{ subscription.tenant }}/${{ subscription.archetype }}/${{ subscription.subName }}"
+      tfVarsFileForSub: '${{ subscription.subName }}.tfvars'
+      BackendServiceConnection: 'azure-sp-eslz'
+      EnvironmentServiceConnection: 'azure-sp-eslz' 
+      BackendRGName: 'core-resources'
+      BackendStorageAcctName: 'tfstate0100'
+      BackendStorageContName: 'state'
+      #backendAzureRmKey: "${{ subscription.tenant }}.${{ subscription.archetype }}.tfstate"
+    jobs:
+      - job: JOB_INIT_PLAN_${{subscription.stageName}}
+        pool: "${{ variables['devBuildAgentPool'] }}"
+        steps:
+        - checkout: self
+        - task: Bash@3
+          displayName: 'Check VARS'
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo 'checking tenant value'
+              echo ${{ subscription.tenant }}
+              echo 'checking archetype value'
+              echo ${{ subscription.archetype }}
+              echo 'checking sub value'
+              echo ${{ subscription.subName }}
+              echo 'checking netconfigpath'
+              echo $(variables.netConfigPath)
+              echo 'checking secconfigpath with non-runtime syntax'
+              echo ${{ variables.netConfigPath }}
+              echo 'checking secconfigpath'
+              echo $(variables.secConfigPath)
+              echo 'checking tfVarsFileForSub'
+              echo $(tfVarsFileForSub)
+              ls
+        - task: Bash@3
+          displayName: List all Folders in $(System.DefaultWorkingDirectory)
+          inputs:
+            targetType: 'inline'
+            script: |
+              tree $(System.DefaultWorkingDirectory)
+        - task: Bash@3
+          displayName: List all Folders in ${{ variables.tfWorkingDirectory }}
+          inputs:
+            targetType: 'inline'
+            script: |
+              tree $(System.DefaultWorkingDirectory)
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'      
+        - task: TerraformInstaller@0
+          displayName: "Install terraform version ${{ variables.terraformVersion }}"
+          inputs:
+           #terraformVersion: 'latest'
+            terraformVersion: '${{ variables.terraformVersion }}'
+        - task: Bash@3
+          displayName: 'Prepare provider.tf and subsciption.tfvars for the sub'
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo 'checking sub value'
+              echo ${{ subscription.subName }}
+              ls -alt
+              cp './providers/dev-tenant/'${{ subscription.subName }}'.tf' .
+              cp './providers/dev-tenant/'${{ subscription.subName }}''.tfvars .
+              echo 'view files'
+              ls
+              tree
+              ls -alt
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'       
+        - task: TerraformTaskV4@4
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'
+            backendServiceArm: '${{ variables.BackendServiceConnection }}'
+            backendAzureRmResourceGroupName: '${{ variables.BackendRGName }}'
+            backendAzureRmStorageAccountName: '${{ variables.BackendStorageAcctName }}'
+            backendAzureRmContainerName: '${{ variables.BackendStorageContName }}'
+            backendAzureRmKey: "${{ subscription.tenant }}.${{ subscription.subName }}.tfstate"
+          env:
+            ARM_USE_AZUREAD: true
+            # terraform init -backend-config=storage_account_name=tfstate0100 -backend-config=container_name=state -backend-config=key=dev-tenant.corp.tfstate
+            # -backend-config=resource_group_name=core-resources -backend-config=subscription_id=29c7e3d4-e589-4555-a1d8-ac60fcc05a2c -backend-config=tenant_id=e5216896-13b9-4e5f-8329-219f25e65d74 -backend-config=use_msi=true
+        - task: TerraformTaskV4@4
+          displayName: Terraform Plan
+          name: STEP_TFPLAN_${{subscription.stageName}}
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'
+            environmentServiceNameAzureRM: '${{ variables.EnvironmentServiceConnection }}'
+            backendServiceArm: '${{ variables.BackendServiceConnection }}'
+            backendAzureRmResourceGroupName: '${{ variables.BackendRGName }}'
+            backendAzureRmStorageAccountName: '${{ variables.BackendStorageAcctName }}'
+            backendAzureRmContainerName: '${{ variables.BackendStorageContName }}'
+            backendAzureRmKey: "${{ subscription.tenant }}.${{ subscription.subName }}.tfstate"
+            commandOptions: '-out="${{ subscription.tenant }}-${{ subscription.subName }}.tfplan" -detailed-exitcode -var-file="${{ subscription.subName }}.tfvars"'
+            publishPlanResults: ${{ subscription.tenant }}-${{ subscription.subName }}
+          env:
+            ARM_USE_AZUREAD: true
+        - task: Bash@3
+          displayName: 'Check for plan file'
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo 'checking sub value'
+              echo ${{ subscription.subName }}
+              ls
+              tree
+              ls -alt
+              cat ./${{ subscription.tenant }}-${{ subscription.subName }}.tfplan
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'
+        - publish: ${{ variables.tfWorkingDirectory }}/${{subscription.tenant}}-${{ subscription.subName }}.tfplan
+          artifact: ${{ subscription.tenant }}-${{ subscription.subName }}-tfplan
+        # - task: PublishPipelineArtifact@1
+        #   inputs:
+        #     targetPath: '$(Pipeline.Workspace)' # File or directory path. Default: $(Pipeline.Workspace).
+        #     artifact: ${{ subscription.tenant }}-${{ subscription.subName }}-tfplan # Name of directory to create
+        #     publishLocation: 'pipeline' # Artifact publish location. Default: pipeline.
+      - job: waitForValidation
+        displayName: Wait for external validation  
+        pool: server
+        steps:   
+        - task: ManualValidation@0
+          timeoutInMinutes: 10
+          inputs:
+            instructions: 'Please validate the build configuration and resume'
+
+# https://blog.smartcloudarchitect.fr/azdo-pipelines-template-terraform
+# https://www.linkedin.com/pulse/como-montar-um-pipeline-de-terraform-azure-devops-cloudmotionbr/?originalSubdomain=pt
+# https://github.com/hashicorp/terraform-provider-azurerm/issues/2977#issuecomment-1600984321
+# $(<ReferenceName>.changesPresent) - true or false
+
+  - stage: DEV_STG_APPLY_${{subscription.stageName}}
+    dependsOn: DEV_STG_PLAN_${{subscription.stageName}}
+    variables:
+      tfPlanChangesPresent: $[stageDependencies.DEV_STG_PLAN_${{subscription.stageName}}.JOB_INIT_PLAN_${{subscription.stageName}}.outputs['STEP_TFPLAN_${{subscription.stageName}}.changesPresent']]
+      netConfigPath: "${{ variables.netConfigDir }}/${{ subscription.tenant }}/${{ subscription.archetype }}/${{ subscription.subName }}"
+      secConfigPath: "${{ variables.setConfigDir }}/${{ subscription.tenant }}/${{ subscription.archetype }}/${{ subscription.subName }}"
+      tfVarsFileForSub: '${{ subscription.subName }}.tfvars'
+      BackendServiceConnection: 'azure-sp-eslz'
+      EnvironmentServiceConnection: 'azure-sp-eslz' 
+      BackendRGName: 'core-resources'
+      BackendStorageAcctName: 'tfstate0100'
+      BackendStorageContName: 'state'
+      backendAzureRmKey: "${{ subscription.tenant }}.${{ subscription.archetype }}.tfstate"
+    condition: eq(dependencies.DEV_STG_PLAN_${{subscription.stageName}}.outputs['JOB_INIT_PLAN_${{subscription.stageName}}.STEP_TFPLAN_${{subscription.stageName}}.changesPresent'], 'true')
+    jobs:
+    - job: JOB_TF_APPLY
+      pool: "${{ variables['devBuildAgentPool'] }}"
+      steps:
+        - checkout: self
+        - task: Bash@3
+          displayName: "Checking variable values from previous stage"
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo 'tf plan changes present:'$(tfPlanChangesPresent)
+              echo 'terraform plan detected pending changes hence we are proceeding with the apply stage now, requiring approval(s)'
+        - task: TerraformInstaller@0
+          displayName: "Install terraform version ${{ variables.terraformVersion }}"
+          inputs:
+            terraformVersion: '${{ variables.terraformVersion }}'
+        - task: Bash@3
+          displayName: 'Prepare the terraform provider files for each subscription'
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo 'checking sub value'
+              echo ${{ subscription.subName }}
+              cp './providers/prod-tenant/'${{ subscription.subName }}'.tf' .
+              cp './providers/prod-tenant/'${{ subscription.subName }}'.tfvars' .
+              echo 'view files'
+              ls
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'
+        - task: TerraformTaskV4@4
+          displayName: Terraform Init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'
+            backendServiceArm: '${{ variables.BackendServiceConnection }}'
+            backendAzureRmResourceGroupName: '${{ variables.BackendRGName }}'
+            backendAzureRmStorageAccountName: '${{ variables.BackendStorageAcctName }}'
+            backendAzureRmContainerName: '${{ variables.BackendStorageContName }}'
+            backendAzureRmKey: "${{ subscription.tenant }}.${{ subscription.subName }}.tfstate" # <== See if it will read this from Backend config in providers/terraform.tf, otherwise set based on name of sub in loop.
+          env:
+            ARM_USE_AZUREAD: true
+            # terraform init -backend-config=storage_account_name=tfstate0100 -backend-config=container_name=state -backend-config=key=dev-tenant.corp.tfstate
+            # -backend-config=resource_group_name=core-resources -backend-config=subscription_id=29c7e3d4-e589-4555-a1d8-ac60fcc05a2c -backend-config=tenant_id=e5216896-13b9-4e5f-8329-219f25e65d74 -backend-config=use_msi=true
+        
+        - download: current
+          artifact: ${{ subscription.tenant }}-${{ subscription.subName }}-tfplan
+        
+        - task: Bash@3
+          displayName: 'Check for artifact'
+          inputs:
+            targetType: 'inline'
+            script: |
+              echo 'checking sub artifact'
+              echo '${{ subscription.subName }}'
+              find . -name '${{ subscription.tenant }}-${{ subscription.subName }}.tfplan'
+              pwd
+              cp '$(Pipeline.Workspace)/${{ subscription.tenant }}-${{ subscription.subName }}-tfplan/${{ subscription.tenant }}-${{ subscription.subName }}.tfplan' .
+              pwd
+              tree
+              ls
+              find . -name '${{ subscription.tenant }}-${{ subscription.subName }}.tfplan'
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'
+        - task: TerraformTaskV4@4
+          displayName: Terraform Apply
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            workingDirectory: '${{ variables.tfWorkingDirectory }}'
+            #commandOptions: '"${{ subscription.tenant }}-${{ subscription.subName }}.tfplan" -var-file="${{ subscription.subName }}.tfvars" -auto-approve'
+            commandOptions: '"${{ subscription.tenant }}-${{ subscription.subName }}.tfplan"'
+            environmentServiceNameAzureRM: '${{ variables.EnvironmentServiceConnection }}'
+          env:
+            ARM_USE_AZUREAD: true
+
+# ----- PROD STAGES ------
+
+# - stage: STG_START_PROD
+# # ${{ if eq(length(parameters.dev_subscriptions), 0) }}:
+# # condition: false
+# # ${{ else }}:
+# # condition: |
+# # # and(
+# # #   True,
+# # #   ne(dependencies.Roll_Back_${{ join('.result, ''Skipped''), ne(dependencies.Roll_Back_', parameters.copyStages_UAT.*.name) }}.result, 'Skipped')
+# # # )
+#   dependsOn:
+#     - ${{ each subscription in parameters.dev_subscriptions }} :
+#     - DEV_STG_PLAN_${{subscription.stageName}}
+#   #condition: always()
+#   condition: and(succeeded(), ${{ containsValue(parameters.onlyForBranches, variables['Build.SourceBranch']) }}) # https://stackoverflow.com/questions/61727244/how-to-use-an-array-in-a-condition-for-azure-devops-yaml
+#   #condition: containsValue(dependencies.*.result, 'Failed') # https://stackoverflow.com/questions/70622724/azure-devops-pipeline-yaml-dependencies-filtered-array-in-conditional
+#   #https://stackoverflow.com/questions/75221549/how-to-use-a-dependson-for-the-previous-loop-in-azure-devops-yaml-pipeline-while
+#   jobs:
+#   - job: JOB_TEST
+#     pool: "${{ variables['devBuildAgentPool'] }}"
+#     steps:
+#       - checkout: self
+
+#       - task: Bash@3
+#         displayName: "Checking variable values from previous stage"
+#         inputs:
+#           targetType: 'inline'
+#           script: |
+#             echo 'what will happen'
+
+# # CONDITION CHECK => check if any of the PLAN stages have changes, if not skip / complete subsequent stages.
+# # https://stackoverflow.com/questions/63904345/construct-a-condition-in-azure-devops-using-each
+
+# - ${{ each subscription in parameters.prod_subscriptions }}:
+#   - stage: PROD_STG_PLAN_${{subscription.stageName}}
+#     condition: succeeded('STG_START_PROD')
+#     dependsOn: STG_START_PROD
+#     variables:
+#       netConfigPath: "${{ variables.netConfigDir }}/${{ subscription.tenant }}/${{ subscription.archetype }}/${{ subscription.subName }}"
+#       secConfigPath: "${{ variables.setConfigDir }}/${{ subscription.tenant }}/${{ subscription.archetype }}/${{ subscription.subName }}"
+#       tfVarsFileForSub: '${{ subscription.subName }}.tfvars'
+#       BackendServiceConnection: 'azure-deployments2' # <== Specify name of ADO Service Connection to use for connection to state file. Not sure this will work across tenants with MI? Might need SPN-based Service connection specifying TenantId.
+#       EnvironmentServiceConnection: 'azure-deployments2' # <== Service connection for Azure Deployment. 
+#       BackendRGName: 'core-resources'
+#       BackendStorageAcctName: 'tfstate0100'
+#       BackendStorageContName: 'state'
+#     jobs:
+#       - job: JOB_INIT_PLAN_${{subscription.stageName}}
+#         pool: "${{ variables['devBuildAgentPool'] }}"
+#         steps:
+#         - checkout: self
+#         - task: TerraformInstaller@0
+#           displayName: "Install terraform version ${{ variables.terraformVersion }}"
+#           inputs:
+#             terraformVersion: '${{ variables.terraformVersion }}'

@@ -1,0 +1,6 @@
+
+# - name: "ddos-pp-dev-aue"
+#   resource_group_name: "rg-networking-dev"
+#   location: "australiaeast"
+#   tags:
+#     billing_code: "demo"

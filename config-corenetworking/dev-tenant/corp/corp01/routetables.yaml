@@ -1,0 +1,26 @@
+- name: "rt-app01-01"
+  location: "australiaeast"
+  resource_group_name: "rg-networking-dev"
+  disable_bgp_route_propagation: true
+  subnet_route_table_associations:
+    - name: "rt-app01-01-app01-internally-controlled"
+      subnet_name: "app01-internally-controlled"
+    - name: "rt-app01-01-app01-restricted"
+      subnet_name: "app01-restricted"
+  tags:
+    cost_center: "1234"
+    environment: "prod"
+    security_dimension: "internally-controlled"
+  routes:
+    - name: "route_default"
+      address_prefix: "0.0.0.0/0"
+      next_hop_type: "VirtualAppliance" # VirtualNetworkGateway, VnetLocal, Internet, VirtualAppliance or None
+      #next_hop_firewall_name: azfw-test-hub-ae # Optional - set this when next_hop_type = VirtualAppliance where next hop IP is unknown, and read private IP off AzFw instance
+      next_hop_in_ip_address: "10.0.0.4" # Optional - specify when next_hop_type = VirtualAppliance. Conflicts with "next_hop_in_ip_address"
+    # - name: "example_return_route_to_source_for_public_loadbalancer"
+    #   address_prefix: "201.10.10.5/32"
+    #   next_hop_type: "Internet" # VirtualNetworkGateway, VnetLocal, Internet, VirtualAppliance or None
+    # - name: "route_custom1"
+    #   address_prefix: "10.0.0.0/24"
+    #   next_hop_type: "VirtualAppliance" # VirtualNetworkGateway, VnetLocal, Internet, VirtualAppliance or None
+    #   next_hop_in_ip_address: "10.0.0.5" # Optional - specify when next_hop_type = VirtualAppliance. Conflicts with "next_hop_in_ip_address"

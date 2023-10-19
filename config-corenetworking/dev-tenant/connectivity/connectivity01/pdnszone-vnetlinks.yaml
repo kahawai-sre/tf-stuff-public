@@ -1,0 +1,32 @@
+
+- name: "pdns-vnet-link-blob-vnet-connectivity-001"
+  resource_group_name: "rg-pdns" # RG where Private DNS zone exists
+  private_dns_zone_name: "privatelink.blob.core.windows.net"
+  virtual_network_name: "vnet-connectivity-001"
+  registration_enabled: false
+  tags: 
+    billing_code: "demo"
+
+- name: "pdns-vnet-link-azurecr-vnet-connectivity-001"
+  resource_group_name: "rg-pdns" # RG where Private DNS zone exists
+  private_dns_zone_name: "privatelink.azurecr.io"
+  virtual_network_name: "vnet-connectivity-001"
+  registration_enabled: false
+  tags: 
+    billing_code: "demo"
+
+- name: "pdns-vnet-link-blob-vnet-connectivity-dmz"
+  resource_group_name: "rg-pdns" # RG where Private DNS zone exists
+  private_dns_zone_name: "privatelink.blob.core.windows.net"
+  virtual_network_name: "vnet-connectivity-dmz"
+  registration_enabled: false
+  tags: 
+    billing_code: "demo"
+
+- name: "pdns-vnet-link-azurecr-vnet-connectivity-dmz"
+  resource_group_name: "rg-pdns" # RG where Private DNS zone exists
+  private_dns_zone_name: "privatelink.azurecr.io"
+  virtual_network_name: "vnet-connectivity-dmz"
+  registration_enabled: false
+  tags: 
+    billing_code: "demo"

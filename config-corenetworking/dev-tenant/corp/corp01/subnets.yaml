@@ -1,0 +1,45 @@
+
+- name: "app01-internally-controlled"
+  resource_name: "app01-internally-controlled"
+  location: "australiaeast"
+  address_prefixes:
+    - "10.103.0.0/27"
+  resource_group_name: "rg-networking-dev"
+  virtual_network_name: "vnet-corp-001-ic"
+  private_endpoint_network_policies_enabled: true
+  private_link_service_network_policies_enabled: true
+
+- name: "app01-restricted"
+  resource_name: "app01-restricted"
+  location: "australiaeast"
+  address_prefixes: 
+    - "10.104.0.0/27"
+  resource_group_name: "rg-networking-dev"
+  virtual_network_name: "vnet-corp-001-restricted"
+  private_endpoint_network_policies_enabled: true
+  private_link_service_network_policies_enabled: true
+
+- name: "app01-restricted-appservice1"
+  resource_name: "app01-restricted-appservice1"
+  location: "australiaeast"
+  address_prefixes:
+    - "10.104.0.32/27"
+  resource_group_name: "rg-networking-dev"
+  virtual_network_name: "vnet-corp-001-restricted"
+  private_endpoint_network_policies_enabled: true
+  private_link_service_network_policies_enabled: true
+  service_delegations:
+    - name: "appservice"
+      service_name: "Microsoft.Web/serverFarms"
+      actions: 
+        - "Microsoft.Network/virtualNetworks/subnets/action"
+
+- name: "app01-secure"
+  resource_name: "app01-secure"
+  location: "australiaeast"
+  address_prefixes: 
+    - "10.105.0.0/27"
+  resource_group_name: "rg-networking-dev"
+  virtual_network_name: "vnet-corp-001-secure"
+  private_endpoint_network_policies_enabled: true
+  private_link_service_network_policies_enabled: true

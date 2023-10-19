@@ -1,0 +1,22 @@
+
+- name: "test.local"
+  resource_group_name: "rg-dnszones-dev"
+  soa_record:
+   - name: "test_local_soa"
+     email: "azureprivatedns-host.microsoft.com"
+     expire_time: 2419200
+     minimum_ttl: 10
+     refresh_time: 3600
+     retry_time: 300
+     ttl: 3600
+
+- name: "corp.local"
+  resource_group_name: "rg-dnszones-dev"
+  soa_record:
+   - name: "corp_local_soa"
+     email: "azureprivatedns-host.microsoft.com"
+     expire_time: 2419200
+     minimum_ttl: 10
+     refresh_time: 3600
+     retry_time: 300
+     ttl: 3600

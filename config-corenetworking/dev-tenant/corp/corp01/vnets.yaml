@@ -1,0 +1,20 @@
+- name: "vnet-corp-001-ic"
+  resource_name: "vnet-corp-001-ic"
+  location: "australiaeast"
+  address_space: 
+    - "10.103.0.0/16"
+  resource_group_name: "rg-networking-dev"
+
+- name: "vnet-corp-001-restricted"
+  resource_name: "vnet-corp-001-restricted"
+  location: "australiaeast"
+  address_space:
+    - "10.104.0.0/16"
+  resource_group_name: "rg-networking-dev"
+
+- name: "vnet-corp-001-secure"
+  resource_name: "vnet-corp-001-secure"
+  location: "australiaeast"
+  address_space: 
+    - "10.105.0.0/16"
+  resource_group_name: "rg-networking-dev"

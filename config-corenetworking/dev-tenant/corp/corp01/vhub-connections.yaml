@@ -1,0 +1,35 @@
+# - name: "vnet-corp-001-ic-to-eslz-tf-hub-australiaeast"
+#   virtual_hub_id: "/subscriptions/xxxxf7/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast"
+#   remote_virtual_network_name: "vnet-corp-001-ic"
+#   hub_to_vitual_network_traffic_allowed: "false" # Set to false will block propagation of 'other' routes into VNET/subnets. Required in Secure vHub paradigm.
+#   internet_security_enabled: "false" # Required for "Secure Internet Traffic" in Secure vHub paradigm
+#   routing: # blocks ...
+#   - name: ""
+#     associated_route_table: "/subscriptions/xxxxx-01b8294344f7/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/defaultRouteTable"
+#     propagated_route_table: # block
+#     - route_table_ids: ["/subscriptions/xxxxxxx01b8294344f7/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/noneRouteTable"]
+#       labels: []
+
+# - name: "vnet-corp-001-restricted-to-eslz-tf-hub-australiaeast"
+#   virtual_hub_id: "/subscriptions/xxxxxxx7/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast"
+#   remote_virtual_network_name: "vnet-corp-001-restricted"
+#   hub_to_vitual_network_traffic_allowed: "false" # Set to false will block propagation of 'other' routes into VNET/subnets. Required in Secure vHub paradigm.
+#   internet_security_enabled: "false" # Required for "Secure Internet Traffic" in Secure vHub paradigm
+#   routing: # blocks ...
+#   - name: ""
+#     associated_route_table: "/subscriptions/xxxxxxxx4f7/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/defaultRouteTable"
+#     propagated_route_table: # block
+#     - route_table_ids: ["/subscriptions/xxxxxxxx/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/noneRouteTable"]
+#       labels: []
+
+# - name: "vnet-corp-001-secure-to-eslz-tf-hub-australiaeast"
+#   virtual_hub_id: "/subscriptions/xxxxxx/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast"
+#   remote_virtual_network_name: "vnet-corp-001-secure"
+#   hub_to_vitual_network_traffic_allowed: "false" # Set to false will block propagation of 'other' routes into VNET/subnets. Required in Secure vHub paradigm.
+#   internet_security_enabled: "false" # Required for "Secure Internet Traffic" in Secure vHub paradigm
+#   routing: # blocks ...
+#   - name: ""
+#     associated_route_table: "/subscriptions/xxxxxxxxx/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/defaultRouteTable"
+#     propagated_route_table: # block
+#     - route_table_ids: ["/subscriptions/xxxxxxxxxx/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/noneRouteTable"]
+#       labels: []

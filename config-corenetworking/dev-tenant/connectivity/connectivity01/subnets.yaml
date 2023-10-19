@@ -1,0 +1,50 @@
+
+- name: "subnet-connectivity-main"
+  resource_name: "subnet-connectivity-main"
+  location: "australiaeast"
+  address_prefixes: 
+    - "10.111.0.0/24"
+  resource_group_name: "rg-networking-dev"
+  virtual_network_name: "vnet-connectivity-001"
+  private_endpoint_network_policies_enabled: true
+  private_link_service_network_policies_enabled: true
+
+- name: "subnet-connectivity-pe"
+  resource_name: "subnet-connectivity-pe"
+  location: "australiaeast"
+  address_prefixes: 
+    - "10.111.1.0/24"
+  resource_group_name: "rg-networking-dev"
+  virtual_network_name: "vnet-connectivity-001"
+  private_endpoint_network_policies_enabled: true
+  private_link_service_network_policies_enabled: true
+
+- name: "subnet-private-resolver-inbound"
+  resource_name: "subnet-private-resolver-inbound"
+  location: "australiaeast"
+  address_prefixes: 
+    - "10.111.2.0/24"
+  resource_group_name: "rg-networking-dev"
+  virtual_network_name: "vnet-connectivity-001"
+  private_endpoint_network_policies_enabled: false
+  private_link_service_network_policies_enabled: true
+  service_delegations:
+    - name: "Microsoft.Network.dnsResolvers"
+      service_name: "Microsoft.Network/dnsResolvers"
+      actions: 
+        - "Microsoft.Network/virtualNetworks/subnets/join/action"
+
+- name: "subnet-private-resolver-outbound"
+  resource_name: "subnet-private-resolver-outbound"
+  location: "australiaeast"
+  address_prefixes: 
+    - "10.111.3.0/24"
+  resource_group_name: "rg-networking-dev"
+  virtual_network_name: "vnet-connectivity-001"
+  private_endpoint_network_policies_enabled: false
+  private_link_service_network_policies_enabled: true
+  service_delegations:
+    - name: "Microsoft.Network.dnsResolvers"
+      service_name: "Microsoft.Network/dnsResolvers"
+      actions: 
+        - "Microsoft.Network/virtualNetworks/subnets/join/action"

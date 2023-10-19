@@ -1,0 +1,234 @@
+
+- name: "fwpol-rcg-ae"
+  resource_name: "fwpol-rcg-ae"
+  fw_policy_name: "fwpol-childpolicy-ae" # Maps to 'firewall_policy_id'
+  priority: "500"
+  provider: idp-prod
+  application_rule_collections: #blocks
+    - name: "apprules-core-allow-1"
+      priority: "500" 
+      action: "Allow"
+      rules: #blocks
+      - name: "allow-azuremigrate-diskprep"
+        protocols: #'protocol' is a block
+          - type: "Https" 
+            port: "443"
+        source_addresses:
+          - "10.102.0.0/24"
+        source_ip_groups: [] # list, maps to names of "source_ip_groups" defined in the associated ipgroups config
+        destination_fqdns: # list
+          - "xxxxx.blob.core.windows.net" 
+        destination_fqdn_tags: [] # list
+      - name: "allow-demoapp-apis"
+        protocols:
+          - type: "Https" ## 'protocol' is a block
+            port: "443"
+        source_addresses: 
+          - "10.0.0.0/16"
+          - "10.1.0.0/16"
+          - "10.100.0.0/16" # list
+        source_ip_groups: [] # list, maps to "source_ip_groups"
+        destination_fqdns:
+          - "testapi.api.apicentre.demoapp2.co.nz" # list
+        destination_fqdn_tags: [] # list
+    - name: "apprules-core-allow-2"
+      priority: "501" 
+      action: "Allow"
+      rules: #blocks
+      - name: "allow-management-urls"
+        protocols: #'protocol' is a block
+          - type: "Https" 
+            port: "443"
+          - type: "Http" 
+            port: "80"
+        source_addresses:
+          - "*" # list
+        source_ip_groups: [] # list, maps to "source_ip_groups"
+        destination_fqdns:
+          - "*.microsoft.com"
+          - "*.chocolatey.org"
+          - "md-hdd-pb2nxnk10xp0.z18.blob.storage.azure.net"
+          - "portal.azure.com"
+          - "*.portal.azure.com"
+          - "*.windows.net"
+          - "*.msftauth.net"
+          - "*.msauth.net"
+          - "*.live.com"
+          - "*.office.com"
+          - "*.microsoftonline.com"
+          - "*.microsoftonline-p.com"
+          - "*.microsoftazuread-sso.com"
+          - "management.azure.com"
+          - "*.services.visualstudio.com"
+          - "*.vault.azure.net"
+          - "aka.ms"
+          - "*.aka.ms"
+          - "*.servicebus.windows.net"
+          - "*.discoverysrv.windowsazure.com"
+          - "*.migration.windowsazure.com"
+          - "*.hypervrecoverymanager.windowsazure.com"
+          - "*.blob.core.windows.net"
+          - "hosting.partners.azure.net"
+          - "afd.hosting.portal.azure.net"
+          - "curl.se"
+          - "*.ubuntu.com"
+          - "the.earth.li"
+          - "*.mysql.com"
+          - "dev.mysql.com"
+          - "*.backup.windowsazure.com"
+          - "*.ubuntu.com"
+          - "*.windowsupdate.com"
+          - "*.windows.com"
+          # - "*.azure.com"
+          - "*.skype.com"
+          - "*.digicert.com"
+          - "*.winscp.net" # list
+        destination_fqdn_tags: [] # list
+      - name: "allow-demoapp-apis"
+        protocols:
+          - type: "Https" ## 'protocol' is a block
+            port: "443"
+        source_addresses:
+          - "10.0.0.0/16"
+          - "10.1.0.0/16"
+          - "10.100.0.0/16" # list
+        source_ip_groups: [] # list, maps to "source_ip_groups"
+        destination_fqdns:
+          - "testapi.api.apicentre.demoapp2.co.nz" # list
+        destination_fqdn_tags: [] # list
+  network_rule_collections: #blocks
+    - name: "networkrules-core-allow-1"
+      priority: "400" 
+      action: "Allow"
+      rules: #blocks
+      - name: "allow-onprem-azure-any"
+        protocols:
+          - "Any" # Any, TCP, UDP, ICMP - List
+        source_addresses:
+          - "192.168.0.0/16" # list
+        source_ip_groups: [] # list of names of source IP group names
+        destination_addresses:
+          - "10.0.0.0/8"
+        destination_ip_groups: [] # list of names of target IP group names
+        destination_fqdns: [] # list
+        destination_ports:
+          - "*" #list
+      - name: "allow-azure-onprem-any"
+        protocols:
+          - "Any" # Any, TCP, UDP, ICMP - List
+        source_addresses:
+          - "10.0.0.0/8" # list
+        source_ip_groups: [] # list of names of source IP group names
+        destination_addresses:
+          - "192.168.0.0/16"
+        destination_ip_groups: [] # list of names of target IP group names
+        destination_fqdns: [] # list
+        destination_ports: ["*"] #list
+      - name: "allow-azurevnet-azurevnet-any"
+        protocols:
+          - "Any" # Any, TCP, UDP, ICMP - List
+        source_addresses:
+          - "10.0.0.0/8" # list
+        source_ip_groups: [] # list of names of source IP group names
+        destination_addresses:
+          - "10.0.0.0/8"
+        destination_ip_groups: [] # list of names of target IP group names
+        destination_fqdns: [] # list
+        destination_ports:
+          - "*" #list
+      # Service Tag Rules
+      - name: "allow-azure-vnet-to-azure-services"
+        protocols:
+          - "TCP" # Any, TCP, UDP, ICMP - list
+        source_addresses: 
+          - "*" # list
+        source_ip_groups: [] #["ipg-DemoApp01-qa-vnet-ae"] # list, maps to "source_ip_groups"
+        destination_addresses:
+          - "AzureActiveDirectory"
+          - "AzureMonitor" # list, split by ',' to enumerate
+        destination_ip_groups: [] # List
+        destination_fqdns: [] # List
+        destination_ports:
+          - "443"
+      - name: "allow-udp-gwlb"
+        protocols:
+          - "UDP" # Any, TCP, UDP, ICMP - List
+        source_addresses:
+          - "10.103.0.10/32" # list
+        source_ip_groups: [] # list of names of source IP group names
+        destination_addresses: ["*"]
+        destination_ip_groups: [] # list of names of target IP group names
+        destination_fqdns: [] # list
+        destination_ports: ["*"] #list
+      - name: "allow-udp-ntp"
+        protocols:
+          - "UDP" # Any, TCP, UDP, ICMP - List
+        source_addresses:
+          - "10.0.0.0/8" # list
+        source_ip_groups: [] # list of names of source IP group names
+        destination_addresses:
+          - "*"
+        destination_ip_groups: [] # list of names of target IP group names
+        destination_fqdns: [] # list
+        destination_ports:
+          - "123" #list
+      - name: "allow-azurebastion-to-spokes"
+        protocols:
+          - "TCP" # Any, TCP, UDP, ICMP - list
+        source_addresses:
+          - "10.0.2.0/24" # list
+        source_ip_groups: [] # list, maps to "source_ip_groups"
+        destination_addresses:
+          - "10.1.0.0/16"
+          - "10.100.0.0/16" # list, split by ',' to enumerate
+        destination_ip_groups: [] # List
+        destination_fqdns: [] # List
+        destination_ports:
+          - "22"
+          - "3389"
+      - name: "allow-azurebastion-to-control-plane"
+        protocols:
+          - "TCP" # Any, TCP, UDP, ICMP - List
+        source_addresses:
+          - "10.0.2.0/24" # list
+        source_ip_groups: [] # list of names of source IP group names
+        destination_addresses:
+          - "AzureCloud"
+        destination_ip_groups: [] # list of names of target IP group names
+        destination_fqdns: [] # list
+        destination_ports:
+          - "443" #list
+      - name: "allow-icmp-ae-to-ase-region"
+        protocols:
+          - "ICMP" # Any, TCP, UDP, ICMP - List
+        source_addresses: []
+        #   - "10.192.0.0/16" # list
+        source_ip_groups:
+          - "ipgroup-onprem-nat" # list of names of source IP group names
+        destination_addresses:
+          - "10.194.0.0/16"
+        destination_ip_groups: [] # list of names of target IP group names
+        destination_fqdns: [] # list
+        destination_ports:
+          - "*" #list
+  nat_rule_collections: #blocks
+    - name: "natrules-core-allow-1"
+      priority: "300" 
+      action: "Dnat" # Only 'Dnat', implies allow
+      rules: #blocks
+      - name: "dnat-onprem-to-service-x"
+        protocols:
+          - "TCP" # TCP, UDP, ICMP - List
+        translated_address: "10.200.4.10" # Target IP for DNAT
+        translated_port: "443" # Target port for DNAT  
+        source_addresses: [] # list, split by ',' to enumerate
+        source_ip_groups:
+          - "ipgroup-onprem-nat" # list of names of source IP group names
+        destination_address_public_ip_name: "pip-azfw-ae-1" #/ Name of Public IP resource that has the desired Listener IP (external IP on firewall) - maps to "destination_address" - the public IP address assigned to this Public IP resource
+        destination_ports:
+          - "8443" # List - external ports that DNAT is listening @ on 'destination_address'
+
+
+
+
+

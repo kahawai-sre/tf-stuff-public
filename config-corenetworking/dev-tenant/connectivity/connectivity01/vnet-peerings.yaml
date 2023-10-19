@@ -1,0 +1,54 @@
+# - name: "vnet-corp-001-ic-to-vnet-corp-001-restricted"
+#   resource_group_name: "rg-networking-dev" # Must map to RG where local_virtual_network_name resides
+#   local_virtual_network_name: "vnet-corp-001-ic"
+#   remote_virtual_network_name: "vnet-corp-001-restricted"
+#   allow_virtual_network_access: true
+#   allow_forwarded_traffic: true
+#   allow_gateway_transit: false
+#   use_remote_gateways: false
+
+# - name: "vnet-corp-001-ic-to-vnet-corp-001-secure"
+#   resource_group_name: "rg-networking-dev" # Must map to RG where local_virtual_network_name resides
+#   local_virtual_network_name: "vnet-corp-001-ic"
+#   remote_virtual_network_name: "vnet-corp-001-secure"
+#   allow_virtual_network_access: true
+#   allow_forwarded_traffic: true
+#   allow_gateway_transit: false
+#   use_remote_gateways: false
+
+# - name: "vnet-corp-001-restricted-to-vnet-corp-001-ic"
+#   resource_group_name: "rg-networking-dev" # Must map to RG where local_virtual_network_name resides
+#   local_virtual_network_name: "vnet-corp-001-restricted"
+#   remote_virtual_network_name: "vnet-corp-001-ic"
+#   allow_virtual_network_access: true
+#   allow_forwarded_traffic: true
+#   allow_gateway_transit: false
+#   use_remote_gateways: false
+
+# - name: "vnet-corp-001-restricted-to-vnet-corp-001-secure"
+#   resource_group_name: "rg-networking-dev" # Must map to RG where local_virtual_network_name resides
+#   local_virtual_network_name: "vnet-corp-001-restricted"
+#   remote_virtual_network_name: "vnet-corp-001-secure"
+#   allow_virtual_network_access: true
+#   allow_forwarded_traffic: true
+#   allow_gateway_transit: false
+#   use_remote_gateways: false
+
+# - name: "vnet-corp-001-secure-to-vnet-corp-001-ic"
+#   resource_group_name: "rg-networking-dev" # Must map to RG where local_virtual_network_name resides
+#   local_virtual_network_name: "vnet-corp-001-secure"
+#   remote_virtual_network_name: "vnet-corp-001-ic"
+#   allow_virtual_network_access: true
+#   allow_forwarded_traffic: true
+#   allow_gateway_transit: false
+#   use_remote_gateways: false
+
+# - name: "vnet-corp-001-secure-to-vnet-corp-001-restricted"
+#   resource_group_name: "rg-networking-dev" # Must map to RG where local_virtual_network_name resides
+#   local_virtual_network_name: "vnet-corp-001-secure"
+#   remote_virtual_network_name: "vnet-corp-001-restricted"
+#   allow_virtual_network_access: true
+#   allow_forwarded_traffic: true
+#   allow_gateway_transit: false
+#   use_remote_gateways: false
+

@@ -1,0 +1,16 @@
+
+- name: "pdns-vnet-link-blob-vnet-corp-001-ic"
+  resource_group_name: "rg-pdns" # RG where Private DNS zone exists
+  private_dns_zone_name: "privatelink.blob.core.windows.net"
+  virtual_network_name: "vnet-corp-001-ic"
+  registration_enabled: false
+  tags: 
+    billing_code: "demo"
+
+- name: "pdns-vnet-link-azurecr-vnet-corp-001-ic"
+  resource_group_name: "rg-pdns" # RG where Private DNS zone exists
+  private_dns_zone_name: "privatelink.azurecr.io"
+  virtual_network_name: "vnet-corp-001-ic"
+  registration_enabled: false
+  tags: 
+    billing_code: "demo"

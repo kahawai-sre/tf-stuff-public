@@ -1,0 +1,28 @@
+# - name: "vnet-connectivity-001-to-eslz-tf-hub-australiaeast"
+#   virtual_hub_id: "/subscriptions/xxxx/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast"
+#   remote_virtual_network_name: "vnet-connectivity-001"
+#   hub_to_vitual_network_traffic_allowed: "false" # Set to false will block propagation of 'other' routes into VNET/subnets. Required in Secure vHub paradigm.
+#   internet_security_enabled: "false" # Required for "Secure Internet Traffic" in Secure vHub paradigm
+#   routing: # blocks ...
+#   - name: ""
+#     associated_route_table: "/subscriptionsx/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/defaultRouteTable"
+#     propagated_route_table: # block
+#     - route_table_ids: ["/subscriptions/xxx/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/noneRouteTable"]
+#       labels: []
+
+# - name: "vnet-connectivity-dmz-to-eslz-tf-hub-australiaeast"
+#   virtual_hub_id: "/subscriptions/xxx/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast"
+#   remote_virtual_network_name: "vnet-connectivity-dmz"
+#   hub_to_vitual_network_traffic_allowed: "false" # Set to false will block propagation of 'other' routes into VNET/subnets. Required in Secure vHub paradigm.
+#   internet_security_enabled: "false" # Required for "Secure Internet Traffic" in Secure vHub paradigm
+#   routing: #blocks
+#   - name: ""
+#     associated_route_table: "/subscriptions/xxxxx7/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/defaultRouteTable"
+#     propagated_route_table: #block
+#     - route_table_ids: ["/subscriptions/x4344f7/resourceGroups/eslz-tf-connectivity/providers/Microsoft.Network/virtualHubs/eslz-tf-hub-australiaeast/hubRouteTables/noneRouteTable"]
+#       labels: []
+#     static_vnet_route: #block
+#     - name: "test-default-via-nva-in-spoke"
+#       address_prefixes: ["0.0.0.0/0"]
+#       next_hop_ip_address: "10.110.1.4"
+

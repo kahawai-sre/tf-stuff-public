@@ -1,0 +1,17 @@
+- name: "asg-app1"
+  resource_group_name: "rg-networkprotection-dev" 
+  location: "australiaeast"
+  tags:
+    app_id: "5678"
+    environment: "qa"
+    arc_rating: "tier1"
+    cost_center: "1234"
+    
+- name: "asg-app2"
+  resource_group_name: "rg-networkprotection-dev" 
+  location: "australiaeast"
+  tags:
+    app_id: "5679"
+    environment: "qa"
+    arc_rating: "tier1"
+    cost_center: "1234"

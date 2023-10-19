@@ -1,0 +1,22 @@
+  
+default_security_rules:
+- name: Default-Deny-Internet-Outbound
+  description: Default Deny Internet Outbound
+  direction: Outbound
+  access: Deny
+  priority: 3999
+  source_address_prefix: '*'
+  destination_address_prefix: 'Internet'
+  source_port_range: '*'
+  destination_port_range: '*'
+  protocol: '*'
+- name: Default-Deny-All-Inbound
+  description: Default Deny All Inbound
+  direction: Inbound
+  access: Deny
+  priority: 4000
+  source_address_prefix: '*'
+  destination_address_prefix: '*'
+  source_port_range: '*'
+  destination_port_range: '*'
+  protocol: '*'

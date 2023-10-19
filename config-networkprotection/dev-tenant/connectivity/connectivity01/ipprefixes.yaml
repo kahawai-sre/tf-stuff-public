@@ -1,0 +1,12 @@
+
+- name: "ipprefix-azurefirewall-ae"
+  resource_name: "ipprefix-azurefirewall-ae"
+  location: "australiaeast"
+  resource_group_name: "rg-networkprotection-dev"
+  prefix_length: 29
+  sku: "Standard"
+  #zones: #["1,2,3"] #Zone-Redundant, 1, 2, 3, and No-Zone. Defaults to Zone-Redundant
+  tags:
+    cost_center: "1234"
+    environment: "prod"
+    arc_rating: "tier0"

@@ -1,0 +1,67 @@
+- name: "pip-azfw-ae-1"
+  resource_name: "pip-azfw-ae-1"
+  location: "australiaeast"
+  resource_group_name: "rg-networkprotection-dev"
+  allocation_method: "Static" # Static or Dynamic
+  sku: "Standard" # Standard or Basic
+  public_ip_prefix_name: ipprefix-sharedservices-ae
+
+# - name: "pip-azfw-ae-test-2"
+#   resource_name: "pip-azfw-ae-test-2"
+#   location: "australiaeast"
+#   resource_group_name: "rg-vnet-sharedservices-hub-test"
+#   allocation_method: "Static" # Static or Dynamic
+#   sku: "Standard" # Standard or Basic
+#   public_ip_prefix_name: ipprefix-sharedservices-ae-test
+
+# - name: "pip-azfw-ase-test-1"
+#   resource_name: "pip-azfw-ase-test-1"
+#   location: "australiasoutheast"
+#   resource_group_name: "rg-vnet-sharedservices-hub-test"
+#   allocation_method: "Static" # Static or Dynamic
+#   sku: "Standard" # Standard or Basic
+#   public_ip_prefix_name: ipprefix-sharedservices-ase-test
+
+# - name: "pip-azfw-ase-test-2"
+#   resource_name: "pip-azfw-ase-test-2"
+#   location: "australiasoutheast"
+#   resource_group_name: "rg-vnet-sharedservices-hub-test"
+#   allocation_method: "Static" # Static or Dynamic
+#   sku: "Standard" # Standard or Basic
+#   public_ip_prefix_name: ipprefix-sharedservices-ase-test
+
+  # Bastion IPs
+
+# - name: "pip-bastion-sharedservices-ase-test"
+#   resource_name: "pip-bastion-sharedservices-ase-test"
+#   location: "australiasoutheast"
+#   resource_group_name: "rg-vnet-sharedservices-hub-test"
+#   allocation_method: "Static" # Static or Dynamic
+#   sku: "Standard" # Standard or Basic
+#   public_ip_prefix_name: ipprefix-sharedservices-ase-test
+
+# - name: "pip-bastion-sharedservices-ae"
+#   resource_name: "pip-bastion-sharedservices-ae"
+#   location: "australiaeast"
+#   resource_group_name: "rg-connectivity-sharedservices-ae"
+#   allocation_method: "Static" # Static or Dynamic
+#   sku: "Standard" # Standard or Basic
+#   public_ip_prefix_name: ipprefix-sharedservices-ae
+
+# ##Static Public IP's cannot be used with Virtual Network Gateways. This can potentially be very problematic if a Virtual Network Gateway ever needs to be re-created or re-provisioned.
+# - name: "pip-vpn-gateway-sharedservices-ae-test-1"
+#   resource_name: "pip-vpn-gateway-sharedservices-ae-test-1"
+#   location: "australiaeast"
+#   resource_group_name: "rg-vnet-sharedservices-hub-test"
+#   allocation_method: "Static" # Static or Dynamic
+#   sku: "Standard" # Standard or Basic
+#   # ip_version:
+#   # idle_timeout_in_minutes:
+#   # domain_name_label:
+#   # reverse_fqdn:
+#   public_ip_prefix_name: ipprefix-sharedservices-ae-test
+#   # zones: # Not specifying this, where Standard SKU is set, are deployed as Zone Redundant (by default)
+#   tags:
+#     cost_center: "1234"
+#     environment: "prod"
+#     arc_rating: "tier0"
