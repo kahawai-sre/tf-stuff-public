@@ -25,4 +25,3 @@
 #     - name: "test-default-via-nva-in-spoke"
 #       address_prefixes: ["0.0.0.0/0"]
 #       next_hop_ip_address: "10.110.1.4"
-
